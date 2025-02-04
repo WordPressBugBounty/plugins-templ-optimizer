@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Templ Optimizer
  * Description: An easy-to-use optimization plugin that lets you clean your database and tweak various performance related settings on your WordPress site.
- * Version: 2.1.1
+ * Version: 2.1.2
  * Author: Templ
  * Author URI: https://templ.io/
  * License: GNU GPLv3
