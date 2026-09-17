@@ -2,9 +2,12 @@
 /**
  * Plugin Name: Templ Optimizer
  * Description: An easy-to-use optimization plugin that lets you clean your database and tweak various performance related settings on your WordPress site.
- * Version: 2.1.2
+ * Version: 2.1.3
  * Author: Templ
  * Author URI: https://templ.io/
+ * Requires at least: 5.0
+ * Tested up to: 7.1
+ * Requires PHP: 7.4
  * License: GNU GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: templ-optimizer
@@ -21,6 +24,7 @@ class templOptimizer {
     protected $db = null;
     protected $tweaks = null;
     protected $cli = null;
+    protected $config = null;
 
     private $capability = 'manage_options';
     private $admin_page = 'tools.php?page=templ-optimizer';
@@ -37,7 +41,10 @@ class templOptimizer {
         if( ! function_exists('get_plugin_data') ){
             require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
         }
-        $this->plugin_data = get_plugin_data(__FILE__);
+        // Pass $translate = false so header lookup does not load the plugin
+        // textdomain before the 'init' hook, which triggers the WP 6.7+
+        // "_load_textdomain_just_in_time was called incorrectly" notice.
+        $this->plugin_data = get_plugin_data(__FILE__, false, false);
 
         // Include sub-modules
         require_once( TEMPL_OPTIMIZER_PATH . 'includes/vendor/WPConfigTransformer.php' );

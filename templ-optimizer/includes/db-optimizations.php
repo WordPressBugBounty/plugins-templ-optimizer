@@ -111,25 +111,17 @@ class templOptimizerDb extends templOptimizer {
 
         global $wpdb;
 
-        // Get all transients as an array
-        $query = $wpdb->get_results(
-            "SELECT 'option_name', 'option_value' FROM {$wpdb->prefix}options WHERE 'option_name' LIKE '_transient_timeout%'",
-            $output = 'ARRAY_A'
+        // Count timeout rows whose stored expiration timestamp is in the past.
+        // Column names must not be quoted; option_value holds the unix expiry.
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+                $wpdb->esc_like( '_transient_timeout_' ) . '%',
+                time()
+            )
         );
-        
-        $count = 0;
-        
-        foreach( $query as $transient ) {
 
-            $expiration_time = $transient['option_value'];
-
-            if( $expiration_time < time() ) {
-                $count++;
-            }
-
-        }
-
-        return strval($count);
+        return strval( (int) $count );
 
     }
 
@@ -137,29 +129,26 @@ class templOptimizerDb extends templOptimizer {
 
         global $wpdb;
 
-        // Get all transients as an array
-        $query = $wpdb->get_results(
-            "SELECT 'option_name', 'option_value' FROM {$wpdb->prefix}options WHERE 'option_name' LIKE '_transient_timeout%'",
-            $output = 'ARRAY_A'
+        // Fetch the timeout keys of every expired transient.
+        $expired_timeouts = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+                $wpdb->esc_like( '_transient_timeout_' ) . '%',
+                time()
+            )
         );
 
         $count = 0;
-        
-        foreach( $query as $transient ) {
 
-            $expiration_time = $transient['option_value'];
+        foreach( $expired_timeouts as $timeout_name ) {
 
-            if( $expiration_time < time() ) {
+            $transient_name = substr( $timeout_name, strlen( '_transient_timeout_' ) );
 
-                $transient_name = str_replace( '_transient_timeout_', '', $transient['option_name'] );
+            // Exact-match deletes ($wpdb->delete escapes and avoids LIKE wildcards).
+            $wpdb->delete( $wpdb->options, array( 'option_name' => '_transient_timeout_' . $transient_name ) );
+            $wpdb->delete( $wpdb->options, array( 'option_name' => '_transient_' . $transient_name ) );
 
-                // Delete transient & transient timeout
-                $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE 'option_name' LIKE '_transient_{$transient_name}'");
-                $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE 'option_name' LIKE '_transient_timeout_{$transient_name}'");
-
-                $count++;
-
-            }
+            $count++;
 
         }
 

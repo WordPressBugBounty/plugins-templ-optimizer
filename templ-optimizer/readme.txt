@@ -1,9 +1,9 @@
 === Templ Optimizer ===
 Contributors: Templ
 Tags: optimize, performance, clean-up, speed, database
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 Requires at least: 5.0
-Tested up to: 6.7.1
+Tested up to: 7.1
 Requires PHP: 7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -62,6 +62,14 @@ You can find [documentation for Templ Optimizer here](https://help.templ.io/en/a
 1. A clean and simple interface to optimize your WordPress website.
 
 == Changelog ==
+
+= 2.1.3 =
+* Fixed: Blank admin screen caused by the settings app mounting before its router was ready
+* Fixed: Expired transients cleanup now counts and deletes expired transients correctly
+* Fixed: PHP deprecation notices (dynamic properties) on PHP 8.2+
+* Fixed: "Translation loading was triggered too early" notice on WordPress 6.7+
+* Tested up to WordPress 7.1 and PHP 8.5
+* Updated: Bundled Vue framework to 3.5
 
 = 2.1.2 =
 * Fixed: Prevent disabling of "optimize tables" button (Thanks Lars! :))
