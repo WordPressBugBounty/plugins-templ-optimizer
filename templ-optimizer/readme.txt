@@ -1,10 +1,10 @@
 === Templ Optimizer ===
 Contributors: Templ
 Tags: optimize, performance, clean-up, speed, database
-Stable tag: 2.1.3
-Requires at least: 5.0
+Stable tag: 2.4.0
+Requires at least: 6.3
 Tested up to: 7.1
-Requires PHP: 7.4
+Requires PHP: 8.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,6 +21,7 @@ Clean your site's database and tweak WordPress settings to make your website fas
 Features:
 
 * Clean your site's database
+* Add high-performance database indexes (and revert them)
 * Delete trashed posts
 * Delete revisions
 * Delete auto-drafts
@@ -33,11 +34,20 @@ Features:
 * Change WP Rocket cache preload interval
 * Limit post revisions
 * Increase WordPress memory limit
+* Diagnose slow outbound HTTP requests that block PHP
 * WP-CLI support
 
 ### Clean your site's database
 
 Your WordPress database grows with time and often contains a lot of unnecessary data. Clean your database with Templ Optimizer and see the effect on your database size and experience the difference in performance.
+
+### Add high-performance database indexes
+
+As your site grows, WordPress's default database keys can leave MySQL scanning large tables to find data. Templ Optimizer can add high-performance keys to the core WordPress tables (posts, postmeta, comments, commentmeta, termmeta, users, usermeta and options) so WordPress finds what it needs faster. The change is safe and fully reversible: revert to WordPress's standard keys at any time. On large tables, use the WP-CLI command to avoid browser timeouts. This capability is inspired by the excellent Index WP MySQL For Speed plugin.
+
+### Diagnose slow outbound HTTP requests
+
+Sometimes a site is slow even though CPU load and database queries look fine. A common cause is PHP waiting on slow third-party HTTP calls (`wp_remote_get()` and similar): these run synchronously, so a slow remote server can hold up a whole page. Enable HTTP request diagnostics to capture completed WordPress HTTP API calls into a dedicated, bounded log (7 days / 100,000 records per site), then find the slowest calls, the destinations with the highest cumulative blocking wait, and the plugin or theme responsible. Only the destination host and a redacted path are stored — never query values, headers, cookies or response bodies. Manage it from the admin app or with WP-CLI (`wp templ-optimizer http enable|status|list|summary|show|clear|disable`).
 
 ### Tweak WordPress & plugin settings
 
@@ -62,6 +72,22 @@ You can find [documentation for Templ Optimizer here](https://help.templ.io/en/a
 1. A clean and simple interface to optimize your WordPress website.
 
 == Changelog ==
+
+= 2.4.0 =
+* Added: HTTP request diagnostics — find slow outbound `wp_remote_*` calls that block PHP, with summaries by destination and by plugin/theme
+* Added: A dedicated, per-site log with bounded retention (7 days / 100,000 records) storing only host + redacted path — never query values, headers, cookies or bodies
+* Added: WP-CLI commands `wp templ-optimizer http enable|disable|status|list|summary|show|clear`
+* Added: A "HTTP Requests" screen in the admin app to enable capture, review the slowest calls and clear the log
+
+= 2.3.0 =
+* Added: High-performance database indexes for the core WordPress tables, with one-click enable and revert
+* Added: Per-table status, drift detection (re-apply keys removed by a WordPress/WooCommerce core update) and a dashboard reminder
+* Added: WP-CLI commands `wp templ-optimizer indexes status|enable|disable` (the timeout-safe path for large tables)
+
+= 2.2.0 =
+* Changed: Minimum required PHP version is now 8.0
+* Improved: Added strict typing and full type declarations across the plugin's PHP code
+* Improved: Documented all classes, methods and properties with PHPDoc blocks
 
 = 2.1.3 =
 * Fixed: Blank admin screen caused by the settings app mounting before its router was ready
